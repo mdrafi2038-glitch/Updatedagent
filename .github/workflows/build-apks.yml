@@ -121,3 +121,5 @@ jobs:
           path: release-output/SHA256SUMS.txt
           if-no-files-found: error
           retention-days: 14
+
+# Build workflow enabled for the suite archive.
