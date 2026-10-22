@@ -42,7 +42,7 @@ jobs:
           SDKMANAGER="$(find "$ANDROID_HOME/cmdline-tools" -type f -name sdkmanager -print -quit)"
           test -n "$SDKMANAGER"
           yes | "$SDKMANAGER" --licenses >/dev/null || true
-          "$SDKMANAGER" "platform-tools" "platforms;android-35" "build-tools;35.0.0"
+          "$SDKMANAGER" "platform-tools" "platforms;android-36" "build-tools;36.0.0"
       - name: Extract Android project
         shell: bash
         run: |
@@ -58,6 +58,12 @@ jobs:
         run: |
           set -euo pipefail
           python3 "$BUILD_INPUT/customize_split_apps.py" "$PROJECT_DIR"
+      - name: Align compileSdk with AndroidX dependencies
+        shell: bash
+        run: |
+          set -euo pipefail
+          sed -i 's/compileSdk = 35/compileSdk = 36/g; s/compileSdk 35/compileSdk 36/g' "$PROJECT_DIR/app/build.gradle.kts"
+          grep -n 'compileSdk' "$PROJECT_DIR/app/build.gradle.kts"
       - name: Create debug keystore
         shell: bash
         run: |
@@ -84,7 +90,7 @@ jobs:
           test -n "$CLIENT_APK" && test -n "$ADMIN_APK"
           cp "$CLIENT_APK" release-output/PersonalAgent-Client-debug.apk
           cp "$ADMIN_APK" release-output/PersonalAgent-Admin-debug.apk
-          "$ANDROID_HOME/build-tools/35.0.0/apksigner" verify --verbose release-output/PersonalAgent-Client-debug.apk
+          "$ANDROID_HOME/build-tools/36.0.0/apksigner" verify --verbose release-output/PersonalAgent-Client-debug.apk
           "$ANDROID_HOME/build-tools/35.0.0/apksigner" verify --verbose release-output/PersonalAgent-Admin-debug.apk
           CLIENT_ID="$("$ANDROID_HOME/build-tools/35.0.0/aapt" dump badging release-output/PersonalAgent-Client-debug.apk | sed -n "s/^package: name='\\([^']*\\)'.*/\\1/p" | head -1)"
           ADMIN_ID="$("$ANDROID_HOME/build-tools/35.0.0/aapt" dump badging release-output/PersonalAgent-Admin-debug.apk | sed -n "s/^package: name='\\([^']*\\)'.*/\\1/p" | head -1)"
@@ -122,4 +128,4 @@ jobs:
           if-no-files-found: error
           retention-days: 14
 
-# Build workflow enabled for the suite archive.
+# Build workflow uses compileSdk 36 for androidx.core 1.18.
