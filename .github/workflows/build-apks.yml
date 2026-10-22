@@ -64,7 +64,7 @@ jobs:
           set -euo pipefail
           python3 - <<'PY'
           from pathlib import Path
-          root = Path("$GITHUB_WORKSPACE/extracted/app/src/main/java")
+          root = Path("extracted/app/src/main/java")
           for p in root.rglob("*.kt"):
               s = p.read_text()
               s = s.replace("policyHelper.isDeviceAdminActive()", "policyHelper.isAdminActive()")
