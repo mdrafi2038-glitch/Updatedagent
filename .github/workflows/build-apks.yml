@@ -58,6 +58,20 @@ jobs:
         run: |
           set -euo pipefail
           python3 "$BUILD_INPUT/customize_split_apps.py" "$PROJECT_DIR"
+      - name: Fix DevicePolicyHelper method references
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 - <<'PY'
+          from pathlib import Path
+          root = Path("$GITHUB_WORKSPACE/extracted/app/src/main/java")
+          for p in root.rglob("*.kt"):
+              s = p.read_text()
+              s = s.replace("policyHelper.isDeviceAdminActive()", "policyHelper.isAdminActive()")
+              s = s.replace("dpcHelper.isDeviceAdminActive()", "dpcHelper.isAdminActive()")
+              s = s.replace("dpcHelper.isDeviceOwner()", "dpcHelper.devicePolicyManager.isDeviceOwnerApp(packageName)")
+              p.write_text(s)
+          PY
       - name: Align compileSdk with AndroidX dependencies
         shell: bash
         run: |
